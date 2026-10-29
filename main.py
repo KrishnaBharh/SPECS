@@ -17,7 +17,7 @@ from urllib.parse import urlparse
 
 APP_NAME = "SPECS Player"
 APP_VERSION = "1.2.0"
-CONFIG_DIR = Path.home() / ".config" / "feather-player"
+CONFIG_DIR = Path.home() / ".config" / "SPECS"
 LIBRARY_FILE = CONFIG_DIR / "library.json"
 MAX_HISTORY = 50
 SEARCH_RESULTS = 10

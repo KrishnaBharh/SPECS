@@ -1,4 +1,4 @@
-# Feather Player
+# SPECS Player
 
 **A small terminal music player for Linux Mint and other Linux distributions.**
 
@@ -38,10 +38,10 @@ sudo apt install mpv yt-dlp fzf
 Then launch it:
 
 ```bash
-feather-player
+SPECS
 ```
 
-If `feather-player: command not found` appears, ensure `~/.local/bin` is in your `PATH`, then restart the terminal. You can also run the app directly with `python3 main.py` from this folder.
+If `SPECS: command not found` appears, ensure `~/.local/bin` is in your `PATH`, then restart the terminal. You can also run the app directly with `python3 main.py` from this folder.
 
 ### If YouTube search or playback stops working
 
@@ -63,7 +63,7 @@ If it is already installed with pipx, update it with `pipx upgrade yt-dlp`. Rest
 
 ## Use
 
-1. Run `feather-player`.
+1. Run `SPECS`.
 2. Choose **Search YouTube** and enter a search term. In the `fzf` picker, type to filter, use the arrow keys to move, press `Enter` to choose, or use `Tab` to select multiple tracks. Press `Esc` to go back.
 3. Pick **Play now**, **Add to queue**, or **Favorite**.
 4. Use the Queue menu to play or remove queued items.
@@ -73,9 +73,9 @@ The exact playback controls depend on your `mpv` configuration; by default, `Spa
 
 ## Files and privacy
 
-- App: `~/.local/share/feather-player/`
-- Command: `~/.local/bin/feather-player`
-- Favorites/history: `~/.config/feather-player/library.json`
+- App: `~/.local/share/SPECS/`
+- Command: `~/.local/bin/SPECS`
+- Favorites/history: `~/.config/SPECS/library.json`
 
 Search and playback requests go to YouTube through `yt-dlp`/`mpv`. Feather does not make an account or upload your local favorites/history.
 
@@ -87,11 +87,11 @@ From this folder, run:
 ./uninstall.sh
 ```
 
-This removes the installed app but keeps your library file. Delete `~/.config/feather-player` yourself only if you also want to remove favorites and history.
+This removes the installed app but keeps your library file. Delete `~/.config/SPECS` yourself only if you also want to remove favorites and history.
 
 ## Troubleshooting
 
-- Run `feather-player`, choose **Diagnostics**, and verify both tools show `found`.
+- Run `SPECS`, choose **Diagnostics**, and verify both tools show `found`.
 - If search returns no results, try updating `yt-dlp` and checking your internet connection.
 - If playback fails, test the URL directly with `mpv --no-video 'URL'`.
 
