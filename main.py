@@ -16,11 +16,12 @@ from typing import Any
 from urllib.parse import urlparse
 
 APP_NAME = "Feather Player"
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.2.0"
 CONFIG_DIR = Path.home() / ".config" / "feather-player"
 LIBRARY_FILE = CONFIG_DIR / "library.json"
 MAX_HISTORY = 50
 SEARCH_RESULTS = 10
+MAX_CACHED_SEARCHES = 100
 
 
 def format_duration(seconds: Any) -> str:
@@ -68,21 +69,36 @@ class FeatherPlayer:
         self.queue: list[dict[str, Any]] = []
 
     @staticmethod
-    def _empty_library() -> dict[str, list[dict[str, Any]]]:
-        return {"favorites": [], "history": []}
+    def _empty_library() -> dict[str, Any]:
+        return {"favorites": [], "history": [], "search_cache": {}}
 
-    def _load_library(self) -> dict[str, list[dict[str, Any]]]:
+    def _load_library(self) -> dict[str, Any]:
         try:
             if LIBRARY_FILE.exists():
                 data = json.loads(LIBRARY_FILE.read_text(encoding="utf-8"))
                 if isinstance(data, dict):
+                    cache = data.get("search_cache", {})
+                    if not isinstance(cache, dict):
+                        cache = {}
                     return {
                         "favorites": data.get("favorites", []) if isinstance(data.get("favorites", []), list) else [],
                         "history": data.get("history", []) if isinstance(data.get("history", []), list) else [],
+                        "search_cache": cache,
                     }
         except (OSError, json.JSONDecodeError):
             print(f"Warning: couldn't read your library at {LIBRARY_FILE}. Starting with an empty one.")
         return self._empty_library()
+
+    @staticmethod
+    def _clear_screen() -> None:
+        """Clear the terminal without launching an external command."""
+        if sys.stdout.isatty():
+            print("\033[2J\033[H", end="", flush=True)
+
+    @staticmethod
+    def _cache_key(query: str) -> str:
+        """Make searches with different capitalization/spaces share a cache entry."""
+        return " ".join(query.casefold().split())
 
     def _save_library(self) -> None:
         try:
@@ -115,8 +131,18 @@ class FeatherPlayer:
         return f"{prefix}{title[:64]}  [{duration}]\n    {uploader[:62]}"
 
     def _search_youtube(self, query: str) -> list[dict[str, Any]]:
+        cache = self.library.setdefault("search_cache", {})
+        key = self._cache_key(query)
+
+        # Reuse saved results for a repeat search instead of contacting YouTube.
+        cached_songs = cache.get(key)
+        if isinstance(cached_songs, list) and cached_songs:
+            print(f"Using {len(cached_songs)} saved results.")
+            return [song.copy() for song in cached_songs if isinstance(song, dict)]
+
         if not self._dependency("yt-dlp", "YouTube search"):
             return []
+
         command = [
             "yt-dlp", "--flat-playlist", "--dump-json", "--no-warnings",
             "--ignore-errors", f"ytsearch{SEARCH_RESULTS}:{query}",
@@ -125,7 +151,7 @@ class FeatherPlayer:
         try:
             result = subprocess.run(command, text=True, capture_output=True, timeout=15, check=False)
         except subprocess.TimeoutExpired:
-            print("Search timed out. Try a shorter query or check your connection.")
+            print("Search timed out. Try again in a moment or use a shorter query.")
             return []
         except OSError as exc:
             print(f"Couldn't start yt-dlp: {exc}")
@@ -147,6 +173,13 @@ class FeatherPlayer:
             if detail:
                 print(f"yt-dlp: {detail[-1][:240]}")
                 print("If YouTube changed, update yt-dlp and try again.")
+            return []
+
+        cache[key] = [song.copy() for song in songs]
+        # Keep the cache small and predictable; JSON preserves insertion order.
+        while len(cache) > MAX_CACHED_SEARCHES:
+            del cache[next(iter(cache))]
+        self._save_library()
         return songs
 
     @staticmethod
@@ -421,7 +454,8 @@ class FeatherPlayer:
 
     def run(self) -> None:
         while True:
-            print("\nSPECS")
+            self._clear_screen()
+            print("SPECS")
             print("─" * 54)
             print(" 1. Search YouTube")
             print(" 2. Play a URL")
@@ -435,6 +469,7 @@ class FeatherPlayer:
             except EOFError:
                 print()
                 return
+            self._clear_screen()
             if choice == "1":
                 self.search_menu()
             elif choice == "2":
