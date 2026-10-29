@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Feather Player: a small terminal music player for Linux.
+"""SPECS Player: a small terminal music player for Linux.
 
 Uses Python's standard library, yt-dlp for YouTube search, and mpv for playback.
 No Python packages are required.
@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-APP_NAME = "Feather Player"
+APP_NAME = "SPECS Player"
 APP_VERSION = "1.2.0"
 CONFIG_DIR = Path.home() / ".config" / "feather-player"
 LIBRARY_FILE = CONFIG_DIR / "library.json"
@@ -37,7 +37,7 @@ def format_duration(seconds: Any) -> str:
 
 
 def normalize_song(entry: dict[str, Any]) -> dict[str, Any] | None:
-    """Convert yt-dlp search JSON into the small shape Feather stores."""
+    """Convert yt-dlp search JSON into the small shape SPECS stores."""
     video_id = entry.get("id")
     url = entry.get("webpage_url") or entry.get("original_url")
     if not url and video_id:
@@ -63,7 +63,7 @@ def valid_http_url(value: str) -> bool:
     return parsed.scheme in {"http", "https"} and bool(parsed.netloc)
 
 
-class FeatherPlayer:
+class SPECSPlayer:
     def __init__(self) -> None:
         self.library = self._load_library()
         self.queue: list[dict[str, Any]] = []
@@ -324,7 +324,7 @@ class FeatherPlayer:
             return
         print("\nStarting playback. Use mpv's keyboard controls while it plays; press q in mpv to stop.\n")
         command = [
-            "mpv", "--no-video", "--title=Feather Player",
+            "mpv", "--no-video", "--title=SPECS Player",
             "--ytdl-format=bestaudio/best", "--term-osd=auto", *urls,
         ]
         try:
@@ -465,7 +465,7 @@ class FeatherPlayer:
             print(" 6. Diagnostics")
             print(" 0. Exit")
             try:
-                choice = input("\nfeather > ").strip().lower()
+                choice = input("\nSPECS > ").strip().lower()
             except EOFError:
                 print()
                 return
@@ -483,7 +483,7 @@ class FeatherPlayer:
             elif choice == "6":
                 self.diagnose()
             elif choice in {"0", "q", "quit", "exit"}:
-                print("Feather Player closing. Keep your ears happy.")
+                print("SPECS Player closing. Keep your ears happy.")
                 return
             else:
                 print("Choose one of the menu numbers.")
@@ -494,13 +494,13 @@ def main() -> int:
         print(f"{APP_NAME} {APP_VERSION}")
         return 0
     if len(sys.argv) > 1 and sys.argv[1] in {"--help", "-h"}:
-        print("Usage: feather-player [--help | --version]\n\nRun with no arguments to open the interactive player.")
+        print("Usage: SPECS [--help | --version]\n\nRun with no arguments to open the interactive player.")
         return 0
     try:
-        FeatherPlayer().run()
+        SPECSPlayer().run()
         return 0
     except KeyboardInterrupt:
-        print("\nFeather Player closed.")
+        print("\nSPECS Player closed.")
         return 130
 
 
