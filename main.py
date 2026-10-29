@@ -123,7 +123,7 @@ class FeatherPlayer:
         ]
         print("Searching YouTube…")
         try:
-            result = subprocess.run(command, text=True, capture_output=True, timeout=60, check=False)
+            result = subprocess.run(command, text=True, capture_output=True, timeout=15, check=False)
         except subprocess.TimeoutExpired:
             print("Search timed out. Try a shorter query or check your connection.")
             return []
@@ -204,7 +204,8 @@ class FeatherPlayer:
                 command,
                 input="\n".join(rows) + "\n",
                 text=True,
-                capture_output=True,
+                stdout=subprocess.PIPE,
+                stderr=None,
                 check=False,
             )
         except OSError:
