@@ -4,7 +4,7 @@ from unittest.mock import patch
 from pathlib import Path
 
 MODULE_PATH = Path(__file__).resolve().parents[1] / "main.py"
-spec = importlib.util.spec_from_file_location("feather_player_main", MODULE_PATH)
+spec = importlib.util.spec_from_file_location("specs_player_main", MODULE_PATH)
 module = importlib.util.module_from_spec(spec)
 assert spec and spec.loader
 spec.loader.exec_module(module)
@@ -34,11 +34,11 @@ class TestHelpers(unittest.TestCase):
         self.assertFalse(module.valid_http_url("file:///tmp/song.mp3"))
 
     def test_parse_selection(self):
-        self.assertEqual(module.FeatherPlayer._parse_selection("1,3,3", 4), [0, 2])
-        self.assertEqual(module.FeatherPlayer._parse_selection("2", 4), [1])
-        self.assertEqual(module.FeatherPlayer._parse_selection("0", 4), [])
-        self.assertEqual(module.FeatherPlayer._parse_selection("a", 4), [])
-        self.assertEqual(module.FeatherPlayer._parse_selection("5", 4), [])
+        self.assertEqual(module.SPECSPlayer._parse_selection("1,3,3", 4), [0, 2])
+        self.assertEqual(module.SPECSPlayer._parse_selection("2", 4), [1])
+        self.assertEqual(module.SPECSPlayer._parse_selection("0", 4), [])
+        self.assertEqual(module.SPECSPlayer._parse_selection("a", 4), [])
+        self.assertEqual(module.SPECSPlayer._parse_selection("5", 4), [])
 
     def test_fzf_picker_maps_selected_lines_back_to_songs(self):
         songs = [
@@ -51,7 +51,7 @@ class TestHelpers(unittest.TestCase):
         )
         with patch.object(module.shutil, "which", return_value="/usr/bin/fzf"), \
              patch.object(module.subprocess, "run", return_value=completed) as run:
-            selected = module.FeatherPlayer._fzf_pick(songs)
+            selected = module.SPECSPlayer._fzf_pick(songs)
 
         self.assertEqual(selected, [songs[1]])
         self.assertIn("--multi", run.call_args.args[0])
@@ -59,7 +59,7 @@ class TestHelpers(unittest.TestCase):
 
     def test_fzf_picker_falls_back_when_fzf_is_missing(self):
         with patch.object(module.shutil, "which", return_value=None):
-            self.assertIsNone(module.FeatherPlayer._fzf_pick([{"title": "Blue"}]))
+            self.assertIsNone(module.SPECSPlayer._fzf_pick([{"title": "Blue"}]))
 
 
 if __name__ == "__main__":
